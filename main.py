@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 from aiogram.utils import executor
 
 TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "724545647"))  # Твой ID
+ADMIN_ID = int(os.getenv("ADMIN_ID", "724545647"))
 CHANNEL_ID = int(os.getenv("CHANNEL_ID", "-1002807174993"))
 
 bot = Bot(token=TOKEN)
@@ -45,26 +45,8 @@ async def handle_submission(message: types.Message):
         return
 
     approve_kb = InlineKeyboardMarkup().add(
-        InlineKeyboardButton("✅ Одобрить", callback_data="approve"),
-        InlineKeyboardButton("❌ Отклонить", callback_data="reject")
+        InlineKeyboardButton("✅ Одобрить", callback_data=f"approve_{message.message_id}"),
+        InlineKeyboardButton("❌ Отклонить", callback_data=f"reject_{message.message_id}")
     )
 
     caption = f"Новое объявление от @{message.from_user.username or 'пользователя'}"
-    if message.photo:
-        await message.photo[-1].send_to_chat(ADMIN_ID, caption=caption)
-    else:
-        await bot.send_message(ADMIN_ID, f"{caption}\n\n{message.text}", reply_markup=approve_kb)
-
-    await message.answer("✅ Объявление отправлено на проверку админу!")
-
-@dp.callback_query_handler(lambda c: c.data in ["approve", "reject"])
-async def handle_decision(callback_query: types.CallbackQuery):
-    message = callback_query.message
-    if callback_query.data == "approve":
-        await bot.send_message(CHANNEL_ID, message.text)
-        await bot.answer_callback_query(callback_query.id, "✅ Объявление опубликовано!")
-    else:
-        await bot.answer_callback_query(callback_query.id, "❌ Объявление отклонено.")
-
-if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
