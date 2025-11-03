@@ -1,0 +1,7 @@
+name: telegram-bot
+description: Telegram Bot powered by Aiogram
+services:
+  - name: bot
+    type: python
+    src: .
+    run: python main.py
